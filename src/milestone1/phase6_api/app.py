@@ -36,7 +36,7 @@ def health_check():
     return {"status": "ok", "groq_configured": has_groq}
 
 @app.post("/api/v1/recommendations", response_model=RecommendationResponse)
-def get_recommendations(prefs: UserPreferences, limit: int = 200, top_k: int = 5):
+def get_recommendations(prefs: UserPreferences, limit: int = 5000, top_k: int = 5):
     try:
         # Load restaurants (uses limit due to Hugging Face stream constraints)
         restaurants = load_restaurants(limit=limit)
