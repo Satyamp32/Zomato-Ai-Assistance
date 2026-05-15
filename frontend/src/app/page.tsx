@@ -52,8 +52,13 @@ export default function Home() {
     try {
       let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1/recommendations';
       
+      // Fix: If the user provided the URL without http/https, prepend https://
+      if (!apiUrl.startsWith('http://') && !apiUrl.startsWith('https://')) {
+        apiUrl = 'https://' + apiUrl;
+      }
+
       // Fix: If the user provided the base URL without the endpoint path, append it automatically
-      if (!apiUrl.endsWith('/api/v1/recommendations') && apiUrl.startsWith('http')) {
+      if (!apiUrl.endsWith('/api/v1/recommendations')) {
         apiUrl = apiUrl.replace(/\/$/, '') + '/api/v1/recommendations';
       }
 
