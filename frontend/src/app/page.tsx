@@ -14,6 +14,17 @@ type APIResponse = {
   recommendations: Recommendation[];
 };
 
+const BANGALORE_LOCATIONS = [
+  "Indiranagar", "Koramangala", "Bellandur", "Whitefield", "Jayanagar", 
+  "HSR Layout", "JP Nagar", "Marathahalli", "Malleshwaram", "Banashankari", 
+  "Electronic City", "BTM Layout", "Richmond Road", "Sarjapur Road"
+];
+
+const POPULAR_CUISINES = [
+  "Any", "North Indian", "South Indian", "Chinese", "Italian", "Continental", 
+  "Desserts", "Beverages", "Cafe", "Fast Food", "Street Food", "Asian", "Mediterranean"
+];
+
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,7 +32,7 @@ export default function Home() {
 
   const [location, setLocation] = useState('Bellandur');
   const [budget, setBudget] = useState('high');
-  const [cuisines, setCuisines] = useState('');
+  const [cuisine, setCuisine] = useState('Any');
   const [minRating, setMinRating] = useState('4.0');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,13 +44,19 @@ export default function Home() {
     const payload = {
       location,
       budget,
-      cuisines: cuisines ? cuisines.split(',').map(c => c.trim()) : [],
+      cuisines: cuisine !== 'Any' ? [cuisine] : [],
       min_rating: parseFloat(minRating) || 0,
       additional_text: ""
     };
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1/recommendations';
+      let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1/recommendations';
+      
+      // Fix: If the user provided the base URL without the endpoint path, append it automatically
+      if (!apiUrl.endsWith('/api/v1/recommendations') && apiUrl.startsWith('http')) {
+        apiUrl = apiUrl.replace(/\/$/, '') + '/api/v1/recommendations';
+      }
+
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -49,7 +66,7 @@ export default function Home() {
       });
 
       if (!res.ok) {
-        throw new Error(`API returned ${res.status}`);
+        throw new Error(`API returned ${res.status}. Please check if the Railway backend is awake.`);
       }
 
       const data = await res.json();
@@ -73,14 +90,12 @@ export default function Home() {
         <section className="glass-panel">
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Location</label>
-              <input 
-                type="text" 
-                value={location} 
-                onChange={(e) => setLocation(e.target.value)} 
-                required 
-                placeholder="e.g., Indiranagar"
-              />
+              <label>Location (Bangalore)</label>
+              <select value={location} onChange={(e) => setLocation(e.target.value)} required>
+                {BANGALORE_LOCATIONS.sort().map(loc => (
+                  <option key={loc} value={loc}>{loc}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
@@ -93,13 +108,12 @@ export default function Home() {
             </div>
 
             <div className="form-group">
-              <label>Cuisines (comma separated)</label>
-              <input 
-                type="text" 
-                value={cuisines} 
-                onChange={(e) => setCuisines(e.target.value)} 
-                placeholder="e.g., Italian, Chinese"
-              />
+              <label>Cuisine</label>
+              <select value={cuisine} onChange={(e) => setCuisine(e.target.value)}>
+                {POPULAR_CUISINES.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
 
             <div className="form-group">
