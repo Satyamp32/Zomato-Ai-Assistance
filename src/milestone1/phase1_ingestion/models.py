@@ -12,11 +12,13 @@ class Restaurant(BaseModel):
     @field_validator("rating", mode="before")
     def parse_rating(cls, v):
         try:
+            if isinstance(v, str):
+                v = v.split("/")[0].strip()
             val = float(v)
             if val < 0 or val > 5:
                 return 0.0
             return val
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, AttributeError):
             return 0.0
 
     @field_validator("cuisines", mode="before")

@@ -38,7 +38,7 @@ def iter_restaurants() -> Iterator[Restaurant]:
             location = row_lower.get("location") or row_lower.get("city") or "Unknown"
             cuisines = row_lower.get("cuisines", "")
             cost = str(row_lower.get("cost") or row_lower.get("average cost for two") or "medium")
-            rating = row_lower.get("rating") or row_lower.get("aggregate rating") or 0.0
+            rating = row_lower.get("rating") or row_lower.get("aggregate rating") or row_lower.get("rate") or 0.0
 
             try:
                 restaurant = Restaurant(
